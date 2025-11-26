@@ -1,0 +1,330 @@
+/* ============================================
+   SIDEBAR STYLES
+   Modern, fluid navigation with smooth animations
+   ============================================ */
+
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ============================================
+   HEADER / BRAND
+   ============================================ */
+
+.sidebar-header {
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.brand-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: var(--font-bold);
+    font-size: var(--text-sm);
+    box-shadow: var(--shadow-md);
+}
+
+.brand-text {
+    flex: 1;
+}
+
+.brand-name {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.brand-subtitle {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-weight: var(--font-medium);
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+
+.sidebar-nav {
+    flex: 1;
+    padding: var(--space-md);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Hide scrollbar but keep functionality */
+.sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background: var(--gray-300);
+    border-radius: var(--radius-full);
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-400);
+}
+
+/* Section Titles */
+.nav-section-title {
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: var(--space-md) var(--space-sm);
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-xs);
+}
+
+/* Navigation Items */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 0.625rem 0.75rem;
+    margin-bottom: 0.25rem;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    text-decoration: none;
+    transition: all var(--transition-base);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hover Effect */
+.nav-item:hover {
+    background: var(--gray-100);
+    color: var(--text-primary);
+    transform: translateX(2px);
+}
+
+/* Active State */
+.nav-item.active {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: var(--font-semibold);
+    box-shadow: var(--shadow-sm);
+}
+
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--primary);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* Icons */
+.nav-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+}
+
+.nav-item:hover .nav-icon {
+    transform: scale(1.1);
+}
+
+.nav-label {
+    flex: 1;
+}
+
+/* ============================================
+   FOOTER / USER PROFILE
+   ============================================ */
+
+.sidebar-footer {
+    padding: var(--space-md);
+    border-top: 1px solid var(--border-light);
+    background: var(--gray-50);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    border-radius: var(--radius-md);
+    transition: background var(--transition-base);
+}
+
+.user-profile:hover {
+    background: white;
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.user-info {
+    flex: 1;
+    min-width: 0;
+    /* Allow text truncation */
+}
+
+.user-name {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-role {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    text-transform: capitalize;
+    font-weight: var(--font-medium);
+}
+
+/* Logout Button */
+.btn-logout {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: 0.625rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: white;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.btn-logout:hover {
+    background: var(--gray-100);
+    border-color: var(--gray-300);
+    color: var(--text-primary);
+}
+
+.btn-logout:active {
+    transform: scale(0.98);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.nav-item {
+    animation: slideIn 0.3s ease backwards;
+}
+
+.nav-item:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.nav-item:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.nav-item:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.nav-item:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.nav-item:nth-child(5) {
+    animation-delay: 0.25s;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 70px;
+    }
+
+    .brand-text,
+    .nav-label,
+    .user-info,
+    .btn-logout span {
+        display: none;
+    }
+
+    .brand {
+        justify-content: center;
+    }
+
+    .sidebar-footer {
+        padding: var(--space-sm);
+    }
+
+    .user-profile {
+        justify-content: center;
+    }
+
+    .btn-logout {
+        width: auto;
+        padding: 0.625rem;
+    }
+}

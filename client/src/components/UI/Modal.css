@@ -1,0 +1,131 @@
+/* ============================================
+   MODAL COMPONENT STYLES
+   ============================================ */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    padding: var(--space-lg);
+    animation: fadeIn var(--transition-base);
+}
+
+.modal-content {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-2xl);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Modal Sizes */
+.modal-sm {
+    width: 100%;
+    max-width: 400px;
+}
+
+.modal-md {
+    width: 100%;
+    max-width: 600px;
+}
+
+.modal-lg {
+    width: 100%;
+    max-width: 800px;
+}
+
+.modal-xl {
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* Modal Header */
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-lg) var(--space-xl);
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+    background: var(--gray-100);
+    color: var(--text-primary);
+}
+
+.modal-close:active {
+    transform: scale(0.95);
+}
+
+/* Modal Body */
+.modal-body {
+    padding: var(--space-xl);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .modal-overlay {
+        padding: var(--space-md);
+    }
+
+    .modal-content {
+        max-height: 95vh;
+    }
+
+    .modal-header,
+    .modal-body {
+        padding: var(--space-md) var(--space-lg);
+    }
+
+    .modal-title {
+        font-size: var(--text-xl);
+    }
+}

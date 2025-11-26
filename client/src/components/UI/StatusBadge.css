@@ -1,0 +1,183 @@
+/* ============================================
+   STATUS BADGE COMPONENT
+   ============================================ */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 0.375rem 0.75rem;
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    animation: badgeFadeIn 0.3s ease;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+   STATUS VARIANTS
+   ============================================ */
+
+/* Property Status */
+.status-active {
+    background: var(--status-active-light);
+    color: #065f46;
+}
+
+.status-active .status-dot {
+    background: var(--status-active);
+}
+
+.status-hold {
+    background: var(--status-hold-light);
+    color: #92400e;
+}
+
+.status-hold .status-dot {
+    background: var(--status-hold);
+}
+
+.status-archived {
+    background: var(--status-archived-light);
+    color: var(--gray-700);
+}
+
+.status-archived .status-dot {
+    background: var(--status-archived);
+}
+
+.status-in-progress {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-in-progress .status-dot {
+    background: #3b82f6;
+}
+
+.status-closed {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.status-closed .status-dot {
+    background: #6b7280;
+}
+
+/* Content Status */
+.status-new {
+    background: var(--content-new-light);
+    color: #1e40af;
+}
+
+.status-new .status-dot {
+    background: var(--content-new);
+}
+
+.status-review {
+    background: var(--content-review-light);
+    color: #6b21a8;
+}
+
+.status-review .status-dot {
+    background: var(--content-review);
+}
+
+.status-fix {
+    background: var(--content-fix-light);
+    color: #991b1b;
+}
+
+.status-fix .status-dot {
+    background: var(--content-fix);
+}
+
+.status-ready {
+    background: var(--content-ready-light);
+    color: #065f46;
+}
+
+.status-ready .status-dot {
+    background: var(--content-ready);
+}
+
+/* Generic */
+.status-success {
+    background: var(--success-light);
+    color: #065f46;
+}
+
+.status-success .status-dot {
+    background: var(--success);
+}
+
+.status-warning {
+    background: var(--warning-light);
+    color: #92400e;
+}
+
+.status-warning .status-dot {
+    background: var(--warning);
+}
+
+.status-error {
+    background: var(--error-light);
+    color: #991b1b;
+}
+
+.status-error .status-dot {
+    background: var(--error);
+}
+
+.status-info {
+    background: var(--info-light);
+    color: #1e40af;
+}
+
+.status-info .status-dot {
+    background: var(--info);
+}
+
+.status-neutral {
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+.status-neutral .status-dot {
+    background: var(--gray-500);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes badgeFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}

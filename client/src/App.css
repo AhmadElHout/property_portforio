@@ -1,0 +1,7 @@
+/* App-specific styles (if needed, otherwise can remain minimal) */
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

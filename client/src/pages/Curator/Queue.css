@@ -1,0 +1,109 @@
+/* ============================================
+   CONTENT QUEUE PAGE
+   ============================================ */
+
+.content-queue-page {}
+
+/* ============================================
+   STATUS FILTER PILLS
+   ============================================ */
+
+.status-filters {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    flex-wrap: wrap;
+    animation-delay: 0.1s;
+}
+
+.status-filter-pill {
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-full);
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.status-filter-pill:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.status-filter-pill.active {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+/* Status-specific colors when active */
+.status-filter-pill.new.active {
+    background: var(--content-new);
+    border-color: var(--content-new);
+}
+
+.status-filter-pill.in-review.active {
+    background: var(--content-review);
+    border-color: var(--content-review);
+}
+
+.status-filter-pill.needs-fix.active {
+    background: var(--content-fix);
+    border-color: var(--content-fix);
+}
+
+.status-filter-pill.ready.active {
+    background: var(--content-ready);
+    border-color: var(--content-ready);
+}
+
+/* ============================================
+   AGENT BADGE
+   ============================================ */
+
+.agent-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.agent-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-xs);
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .status-filters {
+        gap: 0.375rem;
+    }
+
+    .status-filter-pill {
+        font-size: var(--text-xs);
+        padding: 0.5rem 0.875rem;
+        flex: 1;
+        min-width: 100px;
+        text-align: center;
+    }
+}
