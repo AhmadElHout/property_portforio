@@ -19,6 +19,7 @@ export const getClients = async (req: Request, res: Response) => {
 export const createClient = async (req: Request, res: Response) => {
     const user = req.user!;
     const { name, type, phone, email, whatsapp, notes } = req.body;
+    console.log('createClient request:', { user, body: req.body });
 
     try {
         const [result] = await pool.execute<ResultSetHeader>(
@@ -28,6 +29,9 @@ export const createClient = async (req: Request, res: Response) => {
         res.status(201).json({ id: result.insertId, message: 'Client created' });
     } catch (error: any) {
         console.error(error);
+        if (error.code === 'ER_NO_REFERENCED_ROW_2' || error.errno === 1452) {
+            return res.status(400).json({ message: 'User account not found. Please log out and log in again.' });
+        }
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
@@ -85,19 +89,29 @@ export const getClientsWithProperties = async (req: Request, res: Response) => {
         if (clientIds.length > 0) {
             const placeholders = clientIds.map(() => '?').join(',');
             const [rows] = await pool.execute<RowDataPacket[]>(
-                `SELECT client_id, relationship, COUNT(*) as cnt FROM client_properties WHERE client_id IN (${placeholders}) GROUP BY client_id, relationship`,
+                `SELECT client_id, relationship, COUNT(*) as cnt, GROUP_CONCAT(property_id) as property_ids FROM client_properties WHERE client_id IN (${placeholders}) GROUP BY client_id, relationship`,
                 clientIds
             );
             counts = (rows as any[]).reduce((acc, row) => {
                 const cid = row.client_id;
-                if (!acc[cid]) acc[cid] = { viewed: 0, interested: 0, will_view: 0 };
-                acc[cid][row.relationship] = row.cnt;
+                if (!acc[cid]) acc[cid] = {
+                    viewed: { count: 0, ids: [] },
+                    interested: { count: 0, ids: [] },
+                    will_view: { count: 0, ids: [] }
+                };
+
+                const ids = row.property_ids ? row.property_ids.split(',').map(Number) : [];
+                acc[cid][row.relationship] = { count: row.cnt, ids };
                 return acc;
             }, {});
         }
         const result = (clients as any[]).map(c => ({
             ...c,
-            properties: counts[c.id] || { viewed: 0, interested: 0, will_view: 0 }
+            properties: counts[c.id] || {
+                viewed: { count: 0, ids: [] },
+                interested: { count: 0, ids: [] },
+                will_view: { count: 0, ids: [] }
+            }
         }));
         res.json(result);
     } catch (error) {

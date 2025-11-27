@@ -89,7 +89,7 @@ const PropertyEdit = () => {
                         const data = await response.json();
                         setFormData({
                             ...data,
-                            owner_id: data.owner ? data.owner.id : '',
+                            owner_id: data.owner ? data.owner.id : '', // Property owner
                             lead_ids: data.leads ? data.leads.map((l: any) => l.id) : []
                         });
                         if (data.images) {
@@ -541,14 +541,14 @@ const PropertyEdit = () => {
                         <h3 style={{ marginBottom: 'var(--space-md)' }}>Client Links</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
                             <div>
-                                <label className="label">Owner</label>
+                                <label className="label">Property Owner</label>
                                 <select
                                     name="owner_id"
                                     className="input"
                                     value={formData.owner_id || ''}
                                     onChange={handleChange}
                                 >
-                                    <option value="">Select Owner...</option>
+                                    <option value="">Select Property Owner...</option>
                                     {clients.filter(c => c.type === 'owner').map(client => (
                                         <option key={client.id} value={client.id}>{client.name}</option>
                                     ))}
@@ -556,21 +556,86 @@ const PropertyEdit = () => {
                             </div>
                             <div>
                                 <label className="label">Interested Leads</label>
-                                <select
-                                    multiple
+                                <div
                                     className="input"
-                                    style={{ height: '100px' }}
-                                    value={formData.lead_ids?.map(String) || []}
-                                    onChange={(e) => {
-                                        const selectedOptions = Array.from(e.target.selectedOptions, option => Number(option.value));
-                                        setFormData(prev => ({ ...prev, lead_ids: selectedOptions }));
+                                    style={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: '0.25rem',
+                                        padding: '0.375rem',
+                                        minHeight: '42px',
+                                        alignItems: 'center',
+                                        cursor: 'text',
+                                        height: 'auto'
                                     }}
+                                    onClick={() => document.getElementById('lead-select')?.focus()}
                                 >
-                                    {clients.filter(c => c.type === 'lead').map(client => (
-                                        <option key={client.id} value={client.id}>{client.name}</option>
-                                    ))}
-                                </select>
-                                <small style={{ color: '#666' }}>Hold Ctrl/Cmd to select multiple</small>
+                                    {formData.lead_ids?.map((leadId: number) => {
+                                        const lead = clients.find(c => c.id === leadId);
+                                        if (!lead) return null;
+                                        return (
+                                            <span
+                                                key={lead.id}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        lead_ids: prev.lead_ids?.filter((id: number) => id !== lead.id)
+                                                    }));
+                                                }}
+                                                style={{
+                                                    backgroundColor: '#0d6efd',
+                                                    color: 'white',
+                                                    padding: '0.15rem 0.5rem',
+                                                    borderRadius: '0.25rem',
+                                                    fontSize: '0.875rem',
+                                                    cursor: 'pointer',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    userSelect: 'none'
+                                                }}
+                                                title="Click to remove"
+                                            >
+                                                {lead.name}
+                                            </span>
+                                        );
+                                    })}
+                                    <select
+                                        id="lead-select"
+                                        value=""
+                                        onChange={(e) => {
+                                            const selectedId = Number(e.target.value);
+                                            if (selectedId && !formData.lead_ids?.includes(selectedId)) {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    lead_ids: [...(prev.lead_ids || []), selectedId]
+                                                }));
+                                            }
+                                        }}
+                                        style={{
+                                            border: 'none',
+                                            outline: 'none',
+                                            background: 'transparent',
+                                            flex: '1',
+                                            minWidth: '120px',
+                                            fontSize: 'inherit',
+                                            color: 'inherit',
+                                            padding: 0,
+                                            margin: 0,
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <option value="" disabled>+ Add Lead...</option>
+                                        {clients
+                                            .filter(c => c.type === 'lead' && !formData.lead_ids?.includes(c.id))
+                                            .map(client => (
+                                                <option key={client.id} value={client.id}>{client.name}</option>
+                                            ))}
+                                    </select>
+                                </div>
+                                <small style={{ color: '#6c757d', display: 'block', marginTop: 'var(--space-xs)' }}>
+                                    Click a tag to remove it
+                                </small>
                             </div>
                         </div>
                     </div>

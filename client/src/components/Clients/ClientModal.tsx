@@ -79,12 +79,19 @@ const ClientModal: React.FC<ClientModalProps> = ({ isOpen, onClose, onSave, clie
                 onSave();
                 onClose();
             } else {
-                const data = await response.json();
-                alert(`Failed to save client: ${data.error || data.message}`);
+                let errorMessage = 'Failed to save client';
+                try {
+                    const data = await response.json();
+                    errorMessage = data.error || data.message || errorMessage;
+                } catch (e) {
+                    console.error('Failed to parse error response', e);
+                    errorMessage += ` (Status: ${response.status} ${response.statusText})`;
+                }
+                alert(errorMessage);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            alert('Error saving client');
+            alert(`Error saving client: ${error.message || 'Unknown error'}`);
         }
     };
 
@@ -108,7 +115,7 @@ const ClientModal: React.FC<ClientModalProps> = ({ isOpen, onClose, onSave, clie
                     <div style={{ marginBottom: '1rem' }}>
                         <label className="label">Type</label>
                         <select name="type" className="input" value={formData.type} onChange={handleChange}>
-                            <option value="owner">Owner</option>
+                            <option value="owner">Property Owner</option>
                             <option value="lead">Lead</option>
                         </select>
                     </div>

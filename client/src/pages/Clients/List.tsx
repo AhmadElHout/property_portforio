@@ -14,7 +14,11 @@ interface Client {
     whatsapp: string;
     status: string;
     notes: string;
-    properties?: { viewed: number; interested: number; will_view: number };
+    properties?: {
+        viewed: { count: number; ids: number[] };
+        interested: { count: number; ids: number[] };
+        will_view: { count: number; ids: number[] };
+    };
 }
 
 const ClientsList = () => {
@@ -73,7 +77,7 @@ const ClientsList = () => {
         {
             header: 'Type',
             accessor: (item: Client) => (
-                <span className={`client-type-badge ${item.type}`}> {item.type === 'owner' ? '👤 Owner' : '🔍 Lead'} </span>
+                <span className={`client-type-badge ${item.type}`}> {item.type === 'owner' ? '👤 Property Owner' : '🔍 Lead'} </span>
             ),
         },
         {
@@ -98,9 +102,9 @@ const ClientsList = () => {
             header: 'Properties',
             accessor: (item: Client) => (
                 <div className="properties-badge">
-                    <span title="Viewed">👁️ {item.properties?.viewed || 0}</span>
-                    <span title="Interested" style={{ marginLeft: '0.5rem' }}>⭐ {item.properties?.interested || 0}</span>
-                    <span title="Will View" style={{ marginLeft: '0.5rem' }}>🗓️ {item.properties?.will_view || 0}</span>
+                    <span title={`Viewed: ${item.properties?.viewed?.ids?.join(', ') || 'None'}`}>👁️ {item.properties?.viewed?.count || 0}</span>
+                    <span title={`Interested: ${item.properties?.interested?.ids?.join(', ') || 'None'}`} style={{ marginLeft: '0.5rem' }}>⭐ {item.properties?.interested?.count || 0}</span>
+                    <span title={`Will View: ${item.properties?.will_view?.ids?.join(', ') || 'None'}`} style={{ marginLeft: '0.5rem' }}>🗓️ {item.properties?.will_view?.count || 0}</span>
                 </div>
             ),
         },
@@ -157,7 +161,7 @@ const ClientsList = () => {
                 onClose={() => { setIsModalOpen(false); setSelectedClient(undefined); }}
                 onSave={() => { fetchClients(); setIsModalOpen(false); setSelectedClient(undefined); }}
                 client={selectedClient}
-                token={token}
+                token={token || ''}
             />
         </div>
     );

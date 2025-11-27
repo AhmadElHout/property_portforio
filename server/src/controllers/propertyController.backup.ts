@@ -84,11 +84,7 @@ export const getProperties = async (req: Request, res: Response) => {
         // Better approach: Join with property_images or use a subquery
         const propertiesWithImages = await Promise.all(properties.map(async (p) => {
             const [images] = await pool.execute<RowDataPacket[]>('SELECT file_path FROM property_images WHERE property_id = ? ORDER BY sort_order LIMIT 5', [p.id]);
-            const [leads] = await pool.execute<RowDataPacket[]>(
-                'SELECT c.id, c.name, c.phone FROM clients c JOIN property_leads pl ON c.id = pl.client_id WHERE pl.property_id = ?',
-                [p.id]
-            );
-            return { ...p, images: images.map(i => i.file_path), thumbnail: images[0]?.file_path, leads };
+            return { ...p, images: images.map(i => i.file_path), thumbnail: images[0]?.file_path };
         }));
 
         res.json(propertiesWithImages);

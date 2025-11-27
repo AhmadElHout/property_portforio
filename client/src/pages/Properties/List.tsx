@@ -5,7 +5,7 @@ import Modal from '../../components/UI/Modal';
 import PageHeader from '../../components/Layout/PageHeader';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './List.css';
 
 interface Property {
@@ -19,6 +19,9 @@ interface Property {
     content_status: string;
     thumbnail?: string;
     images?: string[];
+    owner_name?: string;
+    owner_phone?: string;
+    leads?: { id: number; name: string; phone: string }[];
 }
 
 const PropertiesList = () => {
@@ -31,6 +34,7 @@ const PropertiesList = () => {
     const { token, user } = useAuth();
     const { showToast } = useToast();
     const navigate = useNavigate();
+    const location = useLocation();
     const [filtersExpanded, setFiltersExpanded] = useState(false);
 
     // Filters
@@ -67,7 +71,7 @@ const PropertiesList = () => {
         };
 
         fetchProperties();
-    }, [token, filters.keyword]);
+    }, [token, filters.keyword, location.pathname]);
 
     useEffect(() => {
         let result = properties;
@@ -216,6 +220,49 @@ const PropertiesList = () => {
             )
         },
         {
+            header: 'Client',
+            accessor: (item: Property) => {
+                const hasClients = item.owner_name || (item.leads && item.leads.length > 0);
+
+                if (!hasClients) {
+                    return <span className="text-secondary">—</span>;
+                }
+
+                return (
+                    <select
+                        className="input"
+                        style={{
+                            fontSize: '0.875rem',
+                            padding: '4px 8px',
+                            width: '100%',
+                            maxWidth: '200px',
+                            cursor: 'pointer'
+                        }}
+                        defaultValue=""
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <option value="" disabled>View Interested Clients</option>
+
+                        {item.owner_name && (
+                            <optgroup label="Property Owner">
+                                <option disabled>👤 {item.owner_name} ({item.owner_phone})</option>
+                            </optgroup>
+                        )}
+
+                        {item.leads && item.leads.length > 0 && (
+                            <optgroup label="Interested Leads">
+                                {item.leads.map(lead => (
+                                    <option key={lead.id} disabled>
+                                        🔍 {lead.name} ({lead.phone})
+                                    </option>
+                                ))}
+                            </optgroup>
+                        )}
+                    </select>
+                );
+            }
+        },
+        {
             header: '',
             accessor: (item: Property) => (
                 <button
@@ -244,129 +291,116 @@ const PropertiesList = () => {
                 }
             />
 
-            {/* Keyword Search */}
-            <div className="card fade-in" style={{ marginBottom: 'var(--space-md)' }}>
-                <input
-                    className="input"
-                    name="keyword"
-                    value={filters.keyword}
-                    onChange={handleFilterChange}
-                    placeholder="Search by reference number, price, owner name, or phone last 4 digits..."
-                    style={{ width: '100%' }}
-                />
-            </div>
-
-            {/* Filters - Collapsible */}
-            <div className="card fade-in" style={{ marginBottom: 'var(--space-lg)' }}>
+            {/* Toolbar: Filter Button & Search */}
+            <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
                 <button
                     onClick={() => setFiltersExpanded(!filtersExpanded)}
-                    className="btn btn-ghost"
+                    className="btn btn-secondary"
                     style={{
-                        width: '100%',
-                        justifyContent: 'space-between',
                         display: 'flex',
                         alignItems: 'center',
-                        padding: 'var(--space-md)'
+                        gap: 'var(--space-sm)',
+                        whiteSpace: 'nowrap'
                     }}
                 >
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-                        <span>🔍 Advanced Filters</span>
-                        {activeFilterCount > 0 && (
-                            <span className="badge" style={{
-                                backgroundColor: 'var(--primary)',
-                                color: 'white',
-                                borderRadius: 'var(--radius-full)',
-                                padding: '2px 8px',
-                                fontSize: '0.75rem'
-                            }}>
-                                {activeFilterCount}
-                            </span>
-                        )}
-                    </span>
+                    <span>Filters</span>
+                    {activeFilterCount > 0 && (
+                        <span className="badge" style={{
+                            backgroundColor: 'var(--primary)',
+                            color: 'white',
+                            borderRadius: 'var(--radius-full)',
+                            padding: '2px 8px',
+                            fontSize: '0.75rem'
+                        }}>
+                            {activeFilterCount}
+                        </span>
+                    )}
                     <span>{filtersExpanded ? '▲' : '▼'}</span>
                 </button>
+                <div style={{ flex: 1 }}>
+                    <input
+                        className="input"
+                        name="keyword"
+                        value={filters.keyword}
+                        onChange={handleFilterChange}
+                        placeholder="Search by reference number, price, owner name, or phone last 4 digits..."
+                        style={{ width: '100%' }}
+                    />
+                </div>
+            </div>
 
-                {filtersExpanded && (
-                    <div style={{
-                        borderTop: '1px solid var(--gray-200)',
-                        padding: 'var(--space-md)',
-                        animation: 'slideDown 0.2s ease'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
-                            <h4 style={{ margin: 0 }}>Filter Options</h4>
-                            {activeFilterCount > 0 && (
-                                <button className="btn btn-secondary btn-sm" onClick={clearFilters}>
-                                    Clear All
-                                </button>
-                            )}
+            {/* Collapsible Filter Panel */}
+            {filtersExpanded && (
+                <div className="card fade-in" style={{ marginBottom: 'var(--space-lg)', marginTop: 'var(--space-sm)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
+                        <h4 style={{ margin: 0 }}>Filter Options</h4>
+                        {activeFilterCount > 0 && (
+                            <button className="btn btn-secondary btn-sm" onClick={clearFilters}>
+                                Clear All
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="filters-grid">
+                        <div>
+                            <label className="label">Type</label>
+                            <select className="input" name="property_type" value={filters.property_type} onChange={handleFilterChange}>
+                                <option value="">All Types</option>
+                                <option value="apartment">Apartment</option>
+                                <option value="villa">Villa</option>
+                                <option value="office">Office</option>
+                                <option value="land">Land</option>
+                                <option value="store">Store</option>
+                            </select>
                         </div>
-
-                        <div className="filters-grid">
-                            <div>
-                                <label className="label">Type</label>
-                                <select className="input" name="property_type" value={filters.property_type} onChange={handleFilterChange}>
-                                    <option value="">All Types</option>
-                                    <option value="apartment">Apartment</option>
-                                    <option value="villa">Villa</option>
-                                    <option value="office">Office</option>
-                                    <option value="land">Land</option>
-                                    <option value="store">Store</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="label">Purpose</label>
-                                <select className="input" name="purpose" value={filters.purpose} onChange={handleFilterChange}>
-                                    <option value="">All Purposes</option>
-                                    <option value="sale">Sale</option>
-                                    <option value="rent">Rent</option>
-                                    <option value="both">Both</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="label">Status</label>
-                                <select className="input" name="status" value={filters.status} onChange={handleFilterChange}>
-                                    <option value="">All Statuses</option>
-                                    <option value="active">Active</option>
-                                    <option value="on_hold">On Hold</option>
-                                    <option value="archived">Archived</option>
-                                    <option value="in_progress">In Progress</option>
-                                    <option value="closed">Closed</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="label">Content</label>
-                                <select className="input" name="content_status" value={filters.content_status} onChange={handleFilterChange}>
-                                    <option value="">All Content</option>
-                                    <option value="new">New</option>
-                                    <option value="in_review">In Review</option>
-                                    <option value="ready">Ready</option>
-                                    <option value="needs_fix">Needs Fix</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="label">City</label>
-                                <input
-                                    className="input"
-                                    name="city"
-                                    value={filters.city}
-                                    onChange={handleFilterChange}
-                                    placeholder="Search city..."
-                                />
-                            </div>
-                            <div>
-                                <label className="label">Area</label>
-                                <input
-                                    className="input"
-                                    name="area"
-                                    value={filters.area}
-                                    onChange={handleFilterChange}
-                                    placeholder="Search area..."
-                                />
-                            </div>
+                        <div>
+                            <label className="label">Purpose</label>
+                            <select className="input" name="purpose" value={filters.purpose} onChange={handleFilterChange}>
+                                <option value="">All Purposes</option>
+                                <option value="sale">Sale</option>
+                                <option value="rent">Rent</option>
+                                <option value="both">Both</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="label">Status</label>
+                            <select className="input" name="status" value={filters.status} onChange={handleFilterChange}>
+                                <option value="">All Statuses</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="label">Content</label>
+                            <select className="input" name="content_status" value={filters.content_status} onChange={handleFilterChange}>
+                                <option value="">All Content</option>
+                                <option value="new">New</option>
+                                <option value="needs_fix">Needs Fix</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="label">City</label>
+                            <input
+                                className="input"
+                                name="city"
+                                value={filters.city}
+                                onChange={handleFilterChange}
+                                placeholder="Search city..."
+                            />
+                        </div>
+                        <div>
+                            <label className="label">Area</label>
+                            <input
+                                className="input"
+                                name="area"
+                                value={filters.area}
+                                onChange={handleFilterChange}
+                                placeholder="Search area..."
+                            />
                         </div>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             <Table
                 data={filteredProperties}
