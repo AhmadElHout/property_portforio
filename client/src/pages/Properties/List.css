@@ -143,4 +143,28 @@
         width: 32px;
         height: 32px;
     }
+
+    .header-actions-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-md);
+    }
+
+    .action-button-mobile {
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .header-actions-wrapper {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .action-button-mobile button {
+            width: 100%;
+        }
+    }
+
 }

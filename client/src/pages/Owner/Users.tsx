@@ -175,10 +175,11 @@ const UserManagement = () => {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+            <div className="page-header-wrapper">
                 <h1>User Management</h1>
-                <button className="btn btn-primary" onClick={handleOpenCreateModal}>Add User</button>
+                <button className="btn btn-primary">+ Add User</button>
             </div>
+
             <Table data={users} columns={columns} />
 
             {isUserModalOpen && (

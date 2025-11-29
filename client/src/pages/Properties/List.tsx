@@ -147,24 +147,26 @@ const PropertiesList = () => {
             header: 'Images',
             accessor: (item: any) => (
                 <div className="property-images">
-                    {item.images && item.images.length > 0 ? (
+                    {item.thumbnail ? (
                         <>
-                            {item.images.slice(0, 3).map((img: string, index: number) => (
-                                <img
-                                    key={index}
-                                    src={`http://localhost:3000/${img}`}
-                                    alt="Thumbnail"
-                                    className="property-thumbnail"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setExpandedImage(`http://localhost:3000/${img}`);
-                                    }}
-                                    title="Click to expand"
-                                />
-                            ))}
-                            {item.images.length > 3 && (
+                            <img
+                                src={`http://localhost:3000/${item.thumbnail}`}
+                                alt="Thumbnail"
+                                className="property-thumbnail"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedImage(`http://localhost:3000/${item.thumbnail}`);
+                                }}
+                                style={{
+                                    boxShadow: '3px 3px 8px rgba(0,0,0,0.15)',
+                                    position: 'relative',
+                                    zIndex: 3
+                                }}
+                                title="Selected thumbnail - Click to expand"
+                            />
+                            {item.images && item.images.length > 1 && (
                                 <div className="image-count">
-                                    +{item.images.length - 3}
+                                    +{item.images.length - 1}
                                 </div>
                             )}
                         </>
@@ -222,43 +224,57 @@ const PropertiesList = () => {
         {
             header: 'Client',
             accessor: (item: Property) => {
-                const hasClients = item.owner_name || (item.leads && item.leads.length > 0);
+                const chips: { label: string; type: string }[] = [];
 
-                if (!hasClients) {
+                // Owner chip
+                if (item.owner_name) {
+                    chips.push({
+                        label: `${item.owner_name} (${item.owner_phone})`,
+                        type: 'owner'
+                    });
+                }
+
+                // Leads chips
+                if (item.leads && item.leads.length > 0) {
+                    item.leads.forEach(lead => {
+                        chips.push({
+                            label: `${lead.name} (${lead.phone})`,
+                            type: 'lead'
+                        });
+                    });
+                }
+
+                if (chips.length === 0) {
                     return <span className="text-secondary">—</span>;
                 }
 
                 return (
-                    <select
-                        className="input"
+                    <div
                         style={{
-                            fontSize: '0.875rem',
-                            padding: '4px 8px',
-                            width: '100%',
-                            maxWidth: '200px',
-                            cursor: 'pointer'
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '6px',
+                            cursor: 'default'
                         }}
-                        defaultValue=""
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <option value="" disabled>View Interested Clients</option>
-
-                        {item.owner_name && (
-                            <optgroup label="Property Owner">
-                                <option disabled>👤 {item.owner_name} ({item.owner_phone})</option>
-                            </optgroup>
-                        )}
-
-                        {item.leads && item.leads.length > 0 && (
-                            <optgroup label="Interested Leads">
-                                {item.leads.map(lead => (
-                                    <option key={lead.id} disabled>
-                                        🔍 {lead.name} ({lead.phone})
-                                    </option>
-                                ))}
-                            </optgroup>
-                        )}
-                    </select>
+                        {chips.map((chip, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    backgroundColor: chip.type === 'owner' ? '#0d6efd' : '#0dcaf0',
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    fontSize: '0.75rem',
+                                    color: '#fff',
+                                    whiteSpace: 'nowrap',
+                                    boxShadow: '1px 1px 4px rgba(0,0,0,0.15)'
+                                }}
+                            >
+                                {chip.label}
+                            </div>
+                        ))}
+                    </div>
                 );
             }
         },
@@ -285,11 +301,16 @@ const PropertiesList = () => {
                 title="Properties"
                 subtitle={`${filteredProperties.length} of ${properties.length} properties`}
                 actions={
-                    <button className="btn btn-primary" onClick={() => navigate('/properties/new')}>
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => navigate('/properties/new')}
+                    >
                         + Add Property
                     </button>
                 }
             />
+
+
 
             {/* Toolbar: Filter Button & Search */}
             <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>

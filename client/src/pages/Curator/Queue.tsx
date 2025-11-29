@@ -14,6 +14,7 @@ interface Property {
     agent_name: string;
     content_status: string;
     updated_at: string;
+    thumbnail?: string;
 }
 
 const ContentQueue = () => {
@@ -56,6 +57,25 @@ const ContentQueue = () => {
     };
 
     const columns = [
+        {
+            header: 'Image',
+            accessor: (item: Property) => item.thumbnail ? (
+                <img
+                    src={`http://localhost:3000/${item.thumbnail}`}
+                    alt="Thumbnail"
+                    style={{
+                        width: '50px',
+                        height: '50px',
+                        objectFit: 'cover',
+                        borderRadius: '4px',
+                        boxShadow: '2px 2px 6px rgba(0,0,0,0.2)'
+                    }}
+                    title="Selected thumbnail"
+                />
+            ) : (
+                <div style={{ width: '50px', height: '50px', backgroundColor: '#eee', borderRadius: '4px' }} />
+            )
+        },
         {
             header: 'Type',
             accessor: (item: Property) => (

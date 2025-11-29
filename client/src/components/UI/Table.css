@@ -2,6 +2,15 @@
    TABLE COMPONENT STYLES
    Modern, polished data tables with smooth animations
    ============================================ */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table-wrapper table {
+    min-width: 950px;
+    /* ensures Agent column is always visible */
+}
 
 .table-container {
     background: var(--surface);

@@ -6,6 +6,9 @@ import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import propertyRoutes from './routes/propertyRoutes';
 import clientRoutes from './routes/clientRoutes';
+import requestRoutes from './routes/requestRoutes';
+import ownerRoutes from "./routes/ownerRoutes";
+
 
 dotenv.config();
 
@@ -29,6 +32,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/clients', clientRoutes);
+app.use('/api/requests', requestRoutes);
+app.use("/api/owner", ownerRoutes);
+
 
 // 404 Handler
 app.use((req, res, next) => {

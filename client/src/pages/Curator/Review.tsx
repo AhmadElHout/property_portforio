@@ -9,6 +9,7 @@ const PropertyReview = () => {
     const [property, setProperty] = useState<any>(null);
     const [status, setStatus] = useState('');
     const [notes, setNotes] = useState('');
+    const [selectedThumbnail, setSelectedThumbnail] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchProperty = async () => {
@@ -20,6 +21,7 @@ const PropertyReview = () => {
                     const data = await response.json();
                     setProperty(data);
                     setStatus(data.content_status);
+                    setSelectedThumbnail(data.thumbnail_id || (data.images && data.images.length > 0 ? data.images[0].id : null));
                 }
             } catch (error) {
                 console.error('Failed to fetch property', error);
@@ -43,6 +45,22 @@ const PropertyReview = () => {
                 const errorData = await statusResponse.json();
                 alert(`Failed to update status: ${errorData.message || 'Unknown error'}`);
                 return;
+            }
+
+            // Update thumbnail if selected
+            if (selectedThumbnail && selectedThumbnail !== property.thumbnail_id) {
+                const thumbnailResponse = await fetch(`http://localhost:3000/api/properties/${id}/thumbnail`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ imageId: selectedThumbnail })
+                });
+
+                if (!thumbnailResponse.ok) {
+                    console.error('Failed to update thumbnail');
+                }
             }
 
             if (notes.trim()) {
@@ -164,12 +182,52 @@ const PropertyReview = () => {
                     {/* Images */}
                     {property.images && property.images.length > 0 && (
                         <div style={{ borderTop: '1px solid #eee', paddingTop: 'var(--space-md)' }}>
-                            <h4 style={{ marginBottom: 'var(--space-sm)', color: '#495057' }}>Images</h4>
+                            <h4 style={{ marginBottom: 'var(--space-sm)', color: '#495057' }}>Images (Click to Select Thumbnail)</h4>
                             <div style={{ display: 'flex', gap: 'var(--space-sm)', overflowX: 'auto', padding: 'var(--space-sm) 0' }}>
                                 {property.images.map((img: any) => (
-                                    <img key={img.id} src={`http://localhost:3000/${img.file_path}`} alt="Property" style={{ height: '150px', borderRadius: 'var(--radius-md)', objectFit: 'cover' }} />
+                                    <div
+                                        key={img.id}
+                                        style={{
+                                            position: 'relative',
+                                            cursor: 'pointer',
+                                            border: selectedThumbnail === img.id ? '3px solid var(--primary)' : '2px solid transparent',
+                                            borderRadius: 'var(--radius-md)',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onClick={() => setSelectedThumbnail(img.id)}
+                                        title={selectedThumbnail === img.id ? '✓ Selected as thumbnail' : 'Click to set as thumbnail'}
+                                    >
+                                        <img
+                                            src={`http://localhost:3000/${img.file_path}`}
+                                            alt="Property"
+                                            style={{
+                                                height: '150px',
+                                                borderRadius: 'var(--radius-md)',
+                                                objectFit: 'cover',
+                                                display: 'block'
+                                            }}
+                                        />
+                                        {selectedThumbnail === img.id && (
+                                            <div style={{
+                                                position: 'absolute',
+                                                top: '8px',
+                                                right: '8px',
+                                                backgroundColor: 'var(--primary)',
+                                                color: 'white',
+                                                padding: '4px 8px',
+                                                borderRadius: '4px',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 'bold'
+                                            }}>
+                                                ✓ THUMBNAIL
+                                            </div>
+                                        )}
+                                    </div>
                                 ))}
                             </div>
+                            <p style={{ fontSize: '0.875rem', color: '#6c757d', marginTop: 'var(--space-sm)' }}>
+                                💡 The selected thumbnail will appear on the Agency Portfolio, Content Queue, and Properties pages.
+                            </p>
                         </div>
                     )}
                 </div>

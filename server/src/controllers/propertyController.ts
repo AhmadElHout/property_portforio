@@ -82,13 +82,27 @@ export const getProperties = async (req: Request, res: Response) => {
 
         // Fetch one image for each property (inefficient but simple for now)
         // Better approach: Join with property_images or use a subquery
+        // Fetch images and selected thumbnail for each property
         const propertiesWithImages = await Promise.all(properties.map(async (p) => {
-            const [images] = await pool.execute<RowDataPacket[]>('SELECT file_path FROM property_images WHERE property_id = ? ORDER BY sort_order LIMIT 5', [p.id]);
+            const [images] = await pool.execute<RowDataPacket[]>(
+                'SELECT id, file_path FROM property_images WHERE property_id = ? ORDER BY sort_order LIMIT 5',
+                [p.id]
+            );
             const [leads] = await pool.execute<RowDataPacket[]>(
                 'SELECT c.id, c.name, c.phone FROM clients c JOIN property_leads pl ON c.id = pl.client_id WHERE pl.property_id = ?',
                 [p.id]
             );
-            return { ...p, images: images.map(i => i.file_path), thumbnail: images[0]?.file_path, leads };
+
+            // Get thumbnail: use selected thumbnail_id if set, otherwise first image
+            let thumbnail = null;
+            if (p.thumbnail_id) {
+                const selectedThumbnail = images.find(img => img.id === p.thumbnail_id);
+                thumbnail = selectedThumbnail?.file_path || images[0]?.file_path;
+            } else {
+                thumbnail = images[0]?.file_path;
+            }
+
+            return { ...p, images: images.map(i => ({ id: i.id, file_path: i.file_path })), thumbnail, leads };
         }));
 
         res.json(propertiesWithImages);
@@ -516,6 +530,44 @@ export const addInternalNote = async (req: Request, res: Response) => {
         );
 
         res.json({ message: 'Note added successfully' });
+    } catch (error: any) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// Set property thumbnail
+export const setThumbnail = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { imageId } = req.body;
+    const user = req.user!;
+
+    try {
+        // Only curators can set thumbnails
+        if (user.role !== 'curator') {
+            return res.status(403).json({ message: 'Only curators can set thumbnails' });
+        }
+
+        // Verify the property exists
+        const [props] = await pool.execute<RowDataPacket[]>('SELECT id FROM properties WHERE id = ?', [id]);
+        if (props.length === 0) {
+            return res.status(404).json({ message: 'Property not found' });
+        }
+
+        // Verify image belongs to this property
+        const [images] = await pool.execute<RowDataPacket[]>(
+            'SELECT id FROM property_images WHERE id = ? AND property_id = ?',
+            [imageId, id]
+        );
+
+        if (images.length === 0) {
+            return res.status(400).json({ message: 'Image does not belong to this property' });
+        }
+
+        // Update the thumbnail
+        await pool.execute('UPDATE properties SET thumbnail_id = ? WHERE id = ?', [imageId, id]);
+
+        res.json({ message: 'Thumbnail updated successfully', thumbnail_id: imageId });
     } catch (error: any) {
         console.error(error);
         res.status(500).json({ message: 'Server error', error: error.message });

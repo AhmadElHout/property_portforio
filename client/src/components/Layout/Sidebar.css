@@ -5,20 +5,22 @@
 
 .sidebar {
     width: 260px;
-    height: 100vh;
     background: var(--surface);
     border-right: 1px solid var(--border);
+    padding-top: var(--space-md);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
+
+
 
 /* ============================================
    HEADER / BRAND
    ============================================ */
 
 .sidebar-header {
-    padding: var(--space-lg);
+    padding: var(--space-xl) var(--space-lg);
     border-bottom: 1px solid var(--border-light);
 }
 
@@ -29,35 +31,34 @@
 }
 
 .brand-icon {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
-    border-radius: var(--radius-lg);
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-xl);
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+    color: white;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-weight: var(--font-bold);
-    font-size: var(--text-sm);
-    box-shadow: var(--shadow-md);
 }
 
 .brand-text {
-    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .brand-name {
-    font-size: var(--text-base);
+    font-size: var(--text-lg);
     font-weight: var(--font-semibold);
     color: var(--text-primary);
-    line-height: 1.2;
 }
 
 .brand-subtitle {
     font-size: var(--text-xs);
     color: var(--text-tertiary);
-    font-weight: var(--font-medium);
 }
+
 
 /* ============================================
    NAVIGATION
@@ -104,34 +105,30 @@
 .nav-item {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
-    padding: 0.625rem 0.75rem;
-    margin-bottom: 0.25rem;
-    border-radius: var(--radius-md);
+    gap: var(--space-md);
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.35rem;
+    border-radius: var(--radius-lg);
     color: var(--text-secondary);
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
-    text-decoration: none;
     transition: all var(--transition-base);
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
 }
 
-/* Hover Effect */
 .nav-item:hover {
     background: var(--gray-100);
     color: var(--text-primary);
-    transform: translateX(2px);
+    box-shadow: var(--shadow-sm);
 }
 
-/* Active State */
 .nav-item.active {
     background: var(--primary-light);
     color: var(--primary);
     font-weight: var(--font-semibold);
-    box-shadow: var(--shadow-sm);
+    border-left: 4px solid var(--primary);
 }
+
 
 .nav-item.active::before {
     content: '';
@@ -229,25 +226,20 @@
 /* Logout Button */
 .btn-logout {
     width: 100%;
+    padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--space-sm);
-    padding: 0.625rem;
-    border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    background: white;
+    background: var(--gray-50);
     color: var(--text-secondary);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    font-family: inherit;
-    cursor: pointer;
+    border: 1px solid var(--border);
     transition: all var(--transition-base);
 }
 
 .btn-logout:hover {
     background: var(--gray-100);
-    border-color: var(--gray-300);
     color: var(--text-primary);
 }
 
@@ -301,30 +293,41 @@
 
 @media (max-width: 768px) {
     .sidebar {
-        width: 70px;
+        width: 72px;
     }
 
     .brand-text,
     .nav-label,
-    .user-info,
-    .btn-logout span {
+    .user-role {
         display: none;
     }
 
-    .brand {
-        justify-content: center;
-    }
-
-    .sidebar-footer {
-        padding: var(--space-sm);
-    }
-
-    .user-profile {
-        justify-content: center;
-    }
-
     .btn-logout {
-        width: auto;
-        padding: 0.625rem;
+        font-size: 0;
+        padding: 0.75rem;
     }
+
+    .btn-logout::after {
+        content: "⏻";
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+    }
+}
+
+.brand {
+    justify-content: center;
+}
+
+.sidebar-footer {
+    padding: var(--space-sm);
+}
+
+.user-profile {
+    justify-content: center;
+}
+
+.btn-logout {
+    width: auto;
+    padding: 0.625rem;
+}
 }

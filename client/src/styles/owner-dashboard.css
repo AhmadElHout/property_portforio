@@ -1,0 +1,62 @@
+.owner-dashboard {
+    padding: var(--space-lg);
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.kpi-card {
+    background: white;
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.kpi-card h3 {
+    font-size: 2rem;
+    margin: 0;
+}
+
+.section-title {
+    margin: var(--space-lg) 0 var(--space-md);
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.performance-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.performance-table th,
+.performance-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.performance-table tr:last-child td {
+    border-bottom: none;
+}
+
+.activity-feed {
+    margin-top: var(--space-md);
+}
+
+.activity-item {
+    display: flex;
+    gap: 10px;
+    background: #fafafa;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    margin-bottom: 8px;
+    box-shadow: var(--shadow-sm);
+}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
@@ -11,6 +12,8 @@ import UserManagement from './pages/Owner/Users';
 import AgencyPortfolio from './pages/Owner/AgencyPortfolio';
 import ContentQueue from './pages/Curator/Queue';
 import PropertyReview from './pages/Curator/Review';
+import './styles/owner-dashboard.css';
+
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -26,44 +29,110 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const [stats, setStats] = useState<any>(null);
 
+  useEffect(() => {
+    if (user?.role !== "owner") return;
+
+    const loadStats = async () => {
+      const response = await fetch("http://localhost:3000/api/owner/performance", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.ok) {
+        setStats(await response.json());
+      }
+    };
+
+    loadStats();
+  }, [user, token]);
+
+  // --- If not an owner, keep showing the old simple dashboard ---
+  if (user?.role !== "owner") {
+    return (
+      <div>
+        <div className="page-header">
+          <h1 className="text-3xl font-bold mb-xs">
+            Welcome back, {user?.name}! 👋
+          </h1>
+          <p className="text-secondary">
+            {user?.role === "agent" && "Manage your properties and clients from the sidebar"}
+            {user?.role === "curator" && "Review properties in the content queue"}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Owner Performance Dashboard ---
   return (
-    <div>
+    <div className="owner-dashboard">
       <div className="page-header">
-        <h1 className="text-3xl font-bold mb-xs">
-          Welcome back, {user?.name}! 👋
-        </h1>
-        <p className="text-secondary">
-          {user?.role === 'agent' && 'Manage your properties and clients from the sidebar'}
-          {user?.role === 'curator' && 'Review properties in the content queue'}
-          {user?.role === 'owner' && 'Oversee the agency portfolio and manage users'}
-        </p>
+        <h1 className="text-3xl font-bold mb-xs">Agency Performance Overview</h1>
+        <p className="text-secondary">Real-time insights into agent activity and performance</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-lg fade-in">
-        <div className="card">
-          <h3 className="font-semibold mb-sm">Getting Started</h3>
-          <p className="text-sm text-secondary">
-            Select an option from the sidebar to begin working with the platform.
-          </p>
+      {/* KPI CARDS */}
+      <div className="kpi-grid fade-in">
+        <div className="kpi-card">
+          <h3>{stats?.total_agents ?? "—"}</h3>
+          <p>Total Agents</p>
         </div>
+        <div className="kpi-card">
+          <h3>{stats?.total_properties ?? "—"}</h3>
+          <p>Total Properties</p>
+        </div>
+        <div className="kpi-card">
+          <h3>{stats?.properties_this_month ?? "—"}</h3>
+          <p>New This Month</p>
+        </div>
+        <div className="kpi-card">
+          <h3>{stats?.total_clients ?? "—"}</h3>
+          <p>Total Clients</p>
+        </div>
+      </div>
 
-        <div className="card">
-          <h3 className="font-semibold mb-sm">Quick Actions</h3>
-          <p className="text-sm text-secondary">
-            Use the navigation menu to access all features available to your role.
-          </p>
-        </div>
+      {/* TOP AGENTS */}
+      <h2 className="section-title">Top Performing Agents</h2>
+      <div className="performance-table fade-in">
+        <table>
+          <thead>
+            <tr>
+              <th>Agent</th>
+              <th>Properties Added</th>
+              <th>Clients Added</th>
+              <th>Notes Created</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(stats?.agents || []).map((agent: any) => (
+              <tr key={agent.id}>
+                <td>{agent.name}</td>
+                <td>{agent.properties_added}</td>
+                <td>{agent.clients_added}</td>
+                <td>{agent.notes_created}</td>
+                <td><strong>{agent.score}</strong></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-        <div className="card">
-          <h3 className="font-semibold mb-sm">Your Role</h3>
-          <span className="badge badge-info">{user?.role}</span>
-        </div>
+      {/* RECENT ACTIVITY */}
+      <h2 className="section-title">Recent Activity</h2>
+      <div className="activity-feed fade-in">
+        {(stats?.recent_activity || []).map((item: any, index: number) => (
+          <div className="activity-item" key={index}>
+            <span>📌</span>
+            <p>{item}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
 };
+
 
 import { ToastProvider } from './context/ToastContext';
 

@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
-import { getProperties, getProperty, createProperty, updateProperty, uploadImages, deleteImage, updatePropertyStatus, updateContentStatus, getCuratorFeedback, addCuratorFeedback, deleteFeedback, getInternalNotes, addInternalNote } from '../controllers/propertyController';
+import { getProperties, getProperty, createProperty, updateProperty, uploadImages, deleteImage, updatePropertyStatus, updateContentStatus, getCuratorFeedback, addCuratorFeedback, deleteFeedback, getInternalNotes, addInternalNote, setThumbnail } from '../controllers/propertyController';
 import { authenticateToken, requireRole } from '../middleware/auth';
 
 const router = express.Router();
@@ -22,5 +22,6 @@ router.post('/:id/feedback', requireRole(['curator', 'owner']), addCuratorFeedba
 router.delete('/:id/feedback', requireRole(['agent', 'owner']), deleteFeedback);
 router.get('/:id/notes', requireRole(['agent', 'owner']), getInternalNotes);
 router.post('/:id/notes', requireRole(['agent', 'owner']), addInternalNote);
+router.put('/:id/thumbnail', requireRole(['curator']), setThumbnail);
 
 export default router;

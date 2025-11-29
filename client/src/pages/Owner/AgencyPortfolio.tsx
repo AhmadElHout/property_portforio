@@ -48,6 +48,10 @@ const AgencyPortfolio = () => {
         city: ''
     });
 
+    // Multi-select functionality for Super Admin requests
+    const [multiSelectMode, setMultiSelectMode] = useState(false);
+    const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
+
     // Fetch Agents for Dropdown
     useEffect(() => {
         const fetchAgents = async () => {
@@ -133,7 +137,66 @@ const AgencyPortfolio = () => {
 
     const activeFilterCount = Object.entries(filters).filter(([key, value]) => value && key !== 'keyword').length;
 
+    // Multi-select handlers
+    const toggleMultiSelectMode = () => {
+        setMultiSelectMode(!multiSelectMode);
+        setSelectedProperties([]); // Clear selection when toggling mode
+    };
+
+    const handlePropertySelect = (propertyId: number) => {
+        if (selectedProperties.includes(propertyId)) {
+            setSelectedProperties(selectedProperties.filter(id => id !== propertyId));
+        } else {
+            setSelectedProperties([...selectedProperties, propertyId]);
+        }
+    };
+
+    const handleRequestSuperAdmin = async () => {
+        if (selectedProperties.length === 0) {
+            showToast('Please select at least one property', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:3000/api/requests/super-admin-handling', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ property_ids: selectedProperties })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                showToast(`✓ Super Admin handling requested for ${result.property_count} properties`, 'success');
+                setSelectedProperties([]);
+                setMultiSelectMode(false);
+            } else {
+                const error = await response.json();
+                showToast(`Failed: ${error.message}`, 'error');
+            }
+        } catch (error: any) {
+            showToast(`Network error: ${error.message}`, 'error');
+        }
+    };
+
     const columns = [
+        {
+            header: '',
+            accessor: (item: Property) => (
+                multiSelectMode ? (
+                    <input
+                        type="checkbox"
+                        checked={selectedProperties.includes(item.id)}
+                        onChange={() => handlePropertySelect(item.id)}
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                ) : (
+                    <></>
+                )
+            )
+        },
         {
             header: 'Ref #',
             accessor: (item: Property) => (
@@ -146,7 +209,14 @@ const AgencyPortfolio = () => {
                 <img
                     src={`http://localhost:3000/${item.thumbnail}`}
                     alt="Thumbnail"
-                    style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
+                    style={{
+                        width: '50px',
+                        height: '50px',
+                        objectFit: 'cover',
+                        borderRadius: '4px',
+                        boxShadow: '2px 2px 6px rgba(0,0,0,0.2)'
+                    }}
+                    title="Selected thumbnail"
                 />
             ) : (
                 <div style={{ width: '50px', height: '50px', backgroundColor: '#eee', borderRadius: '4px' }} />
@@ -231,6 +301,36 @@ const AgencyPortfolio = () => {
     return (
         <div>
             <h1 style={{ marginBottom: 'var(--space-lg)' }}>Agency Portfolio</h1>
+            {/* Multi-Select Toolbar */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+
+                {/* Toggle Multi-Select Mode */}
+                <button
+                    className="btn btn-secondary"
+                    onClick={toggleMultiSelectMode}
+                >
+                    {multiSelectMode && selectedProperties.length > 0
+                        ? 'Cancel Selection'
+                        : 'Select Properties'}
+                </button>
+
+
+                {/* Send to Super Admin Button */}
+                {multiSelectMode && selectedProperties.length > 0 && (
+                    <button
+                        className="btn"
+                        style={{
+                            backgroundColor: 'gold',
+                            color: 'black',
+                            fontWeight: '600'
+                        }}
+                        onClick={handleRequestSuperAdmin}
+                    >
+                        📤 Send to Super Admin
+                    </button>
+                )}
+            </div>
+
 
             {/* Toolbar: Filter Button & Search */}
             <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
