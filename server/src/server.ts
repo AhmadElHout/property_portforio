@@ -1,6 +1,8 @@
-import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
+dotenv.config(); // Load environment variables
+
+import express from 'express'; // Server entry point
+import cors from 'cors';
 import path from 'path';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
@@ -8,9 +10,10 @@ import propertyRoutes from './routes/propertyRoutes';
 import clientRoutes from './routes/clientRoutes';
 import requestRoutes from './routes/requestRoutes';
 import ownerRoutes from "./routes/ownerRoutes";
+import superAdminRoutes from './routes/superAdminRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
 
-
-dotenv.config();
+import { getPlatformDb } from './config/multiDb';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,12 +31,17 @@ app.get('/', (req, res) => {
     res.send('Property Portforio API is running');
 });
 
+// Initialize Platform DB
+getPlatformDb().catch(err => console.error('Failed to initialize Platform DB:', err));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/requests', requestRoutes);
 app.use("/api/owner", ownerRoutes);
+app.use('/api/super-admin', superAdminRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 
 // 404 Handler

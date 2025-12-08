@@ -28,6 +28,7 @@ const ClientsList = () => {
     const [filter, setFilter] = useState<'all' | 'owner' | 'lead'>('all');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState<Client | undefined>(undefined);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const fetchClients = async () => {
         try {
@@ -57,12 +58,15 @@ const ClientsList = () => {
         setIsModalOpen(true);
     };
 
-    const handleAdd = () => {
-        setSelectedClient(undefined);
-        setIsModalOpen(true);
-    };
-
-    const filteredClients = filter === 'all' ? clients : clients.filter(c => c.type === filter);
+    // Filter and search clients
+    const filteredClients = clients
+        .filter(c => filter === 'all' || c.type === filter)
+        .filter(c =>
+            searchQuery === '' ||
+            c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            c.phone.includes(searchQuery) ||
+            c.email.toLowerCase().includes(searchQuery.toLowerCase())
+        );
 
     const ownerCount = clients.filter(c => c.type === 'owner').length;
     const leadCount = clients.filter(c => c.type === 'lead').length;
@@ -107,19 +111,7 @@ const ClientsList = () => {
                     <span title={`Will View: ${item.properties?.will_view?.ids?.join(', ') || 'None'}`} style={{ marginLeft: '0.5rem' }}>🗓️ {item.properties?.will_view?.count || 0}</span>
                 </div>
             ),
-        },
-        {
-            header: '',
-            accessor: (item: Client) => (
-                <button
-                    onClick={e => { e.stopPropagation(); handleEdit(item); }}
-                    className="btn-icon"
-                    title="Edit Client"
-                >
-                    ✏️
-                </button>
-            ),
-        },
+        }
     ];
 
     return (
@@ -127,25 +119,31 @@ const ClientsList = () => {
             <PageHeader
                 title="Clients"
                 subtitle={`${clients.length} total clients (${ownerCount} owners, ${leadCount} leads)`}
-                actions={<button className="btn btn-primary" onClick={handleAdd}>+ Add Client</button>}
             />
-            {/* Filter Pills */}
+
+            {/* Search Bar */}
+            <div style={{ marginBottom: 'var(--space-md)' }}>
+                <input
+                    type="text"
+                    className="input"
+                    placeholder="Search clients by name, phone, or email..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ width: '100%', maxWidth: '500px' }}
+                />
+            </div>
+
+            {/* Filter Pills (without All) */}
             <div className="filter-pills fade-in">
                 <button
-                    className={`filter-pill ${filter === 'all' ? 'active' : ''}`}
-                    onClick={() => setFilter('all')}
-                >
-                    All ({clients.length})
-                </button>
-                <button
                     className={`filter-pill ${filter === 'owner' ? 'active' : ''}`}
-                    onClick={() => setFilter('owner')}
+                    onClick={() => setFilter(filter === 'owner' ? 'all' : 'owner')}
                 >
                     👤 Owners ({ownerCount})
                 </button>
                 <button
                     className={`filter-pill ${filter === 'lead' ? 'active' : ''}`}
-                    onClick={() => setFilter('lead')}
+                    onClick={() => setFilter(filter === 'lead' ? 'all' : 'lead')}
                 >
                     🔍 Leads ({leadCount})
                 </button>
@@ -154,7 +152,8 @@ const ClientsList = () => {
                 data={filteredClients}
                 columns={columns}
                 loading={loading}
-                emptyMessage="No clients found. Add your first client to get started!"
+                emptyMessage="No clients found. Clients are automatically created when you add a property owner."
+                onRowClick={(client: Client) => handleEdit(client)}
             />
             <ClientModal
                 isOpen={isModalOpen}

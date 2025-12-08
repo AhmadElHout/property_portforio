@@ -37,6 +37,9 @@ const PropertyEdit = () => {
         content_status: 'new',
         owner_id: '',
         lead_ids: [] as number[],
+        location_lat: '',
+        location_lng: '',
+        location_url: '',
         // Optional Fields
         maid_room: false,
         balcony: false,
@@ -77,6 +80,13 @@ const PropertyEdit = () => {
     const [feedback, setFeedback] = useState<any[]>([]);
     const [internalNotes, setInternalNotes] = useState<any[]>([]);
     const [newNote, setNewNote] = useState('');
+    const [showNewOwnerForm, setShowNewOwnerForm] = useState(false);
+    const [newOwner, setNewOwner] = useState({
+        name: '',
+        phone: '',
+        email: '',
+        whatsapp: ''
+    });
 
     useEffect(() => {
         if (isEdit) {
@@ -87,10 +97,25 @@ const PropertyEdit = () => {
                     });
                     if (response.ok) {
                         const data = await response.json();
+
+                        let ownerId = data.owner ? data.owner.id : '';
+                        let leadIds = data.leads ? data.leads.map((l: any) => l.id) : [];
+
+                        // Check if the current owner is actually a lead now
+                        if (data.owner && data.owner.type === 'lead') {
+                            // Move them to leads
+                            if (!leadIds.includes(data.owner.id)) {
+                                leadIds.push(data.owner.id);
+                            }
+                            // Clear owner
+                            ownerId = '';
+                            showToast(`Previous owner ${data.owner.name} is now a Lead. Please select a new owner.`, 'info');
+                        }
+
                         setFormData({
                             ...data,
-                            owner_id: data.owner ? data.owner.id : '', // Property owner
-                            lead_ids: data.leads ? data.leads.map((l: any) => l.id) : []
+                            owner_id: ownerId,
+                            lead_ids: leadIds
                         });
                         if (data.images) {
                             setExistingImages(data.images);
@@ -180,6 +205,58 @@ const PropertyEdit = () => {
                 const errorData = await response.json();
                 console.error('Failed to update:', errorData);
                 showToast(`Failed: ${errorData.message || 'Unknown error'}`, 'error');
+            }
+        } catch (error: any) {
+            console.error('Network error:', error);
+            showToast(`Network error: ${error.message}`, 'error');
+        }
+    };
+
+    const handleCreateNewOwner = async () => {
+        // Validate required fields
+        if (!newOwner.name.trim() || !newOwner.phone.trim()) {
+            showToast('Name and phone are required', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:3000/api/clients', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    ...newOwner,
+                    type: 'owner',
+                    notes: '' // Backend expects notes
+                    // status is handled by backend based on type
+                })
+            });
+
+            if (response.ok) {
+                const createdOwner = await response.json();
+                // Refresh clients list
+                const clientsRes = await fetch('http://localhost:3000/api/clients', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (clientsRes.ok) {
+                    const clientsData = await clientsRes.json();
+                    setClients(clientsData);
+                }
+
+                // Select the new owner
+                setFormData(prev => ({ ...prev, owner_id: createdOwner.id }));
+
+                // Reset form
+                setNewOwner({ name: '', phone: '', email: '', whatsapp: '' });
+                setShowNewOwnerForm(false);
+
+                showToast(`✓ Owner "${createdOwner.name}" created and selected`, 'success');
+            } else {
+                const error = await response.json();
+                console.error('Failed to create owner:', error);
+                showToast(`Failed: ${error.message}`, 'error');
             }
         } catch (error: any) {
             console.error('Network error:', error);
@@ -464,6 +541,20 @@ const PropertyEdit = () => {
                         <input name="area" className="input" value={formData.area} onChange={handleChange} required />
                     </div>
 
+                    <div style={{ gridColumn: '1 / -1' }}>
+                        <label className="label">Google Maps Location (optional)</label>
+                        <input
+                            name="location_url"
+                            className="input"
+                            value={formData.location_url || ''}
+                            onChange={handleChange}
+                            placeholder="Paste Google Maps link here (Share → Copy link)"
+                        />
+                        <small style={{ color: '#6c757d', fontSize: '0.8rem' }}>
+                            Example: Share → Copy Link from Google Maps.
+                        </small>
+                    </div>
+
                     <div>
                         <label className="label">Ownership Type</label>
                         <input name="ownership_type" className="input" value={formData.ownership_type} onChange={handleChange} required placeholder="e.g. Green Deed" />
@@ -522,6 +613,91 @@ const PropertyEdit = () => {
                         </label>
                     </div>
                 )}
+
+                {/* Property Owner Section */}
+                <div style={{ marginBottom: 'var(--space-lg)' }}>
+                    <label className="label">Property Owner *</label>
+                    <select
+                        name="owner_id"
+                        className="input"
+                        value={formData.owner_id || ''}
+                        onChange={handleChange}
+                        style={{ marginBottom: 'var(--space-sm)' }}
+                    >
+                        <option value="">Select Property Owner...</option>
+                        {clients.filter(c => c.type === 'owner').map(client => (
+                            <option key={client.id} value={client.id}>{client.name} - {client.phone}</option>
+                        ))}
+                    </select>
+                    <button
+                        type="button"
+                        onClick={() => setShowNewOwnerForm(!showNewOwnerForm)}
+                        className="btn btn-ghost"
+                        style={{ fontSize: '0.875rem', padding: '0.25rem 0.5rem' }}
+                    >
+                        {showNewOwnerForm ? '− Cancel' : '+ Add New Property Owner'}
+                    </button>
+                    {showNewOwnerForm && (
+                        <div className="fade-in" style={{
+                            marginTop: 'var(--space-md)',
+                            padding: 'var(--space-md)',
+                            border: '1px solid var(--border)',
+                            borderRadius: 'var(--radius-md)',
+                            backgroundColor: '#f8f9fa'
+                        }}>
+                            <h4 style={{ marginBottom: 'var(--space-sm)', fontSize: 'var(--text-base)' }}>Add New Property Owner</h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)', marginBottom: 'var(--space-sm)' }}>
+                                <div>
+                                    <label className="label" style={{ fontSize: '0.875rem' }}>Name *</label>
+                                    <input
+                                        type="text"
+                                        className="input"
+                                        value={newOwner.name}
+                                        onChange={(e) => setNewOwner({ ...newOwner, name: e.target.value })}
+                                        placeholder="Owner name"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="label" style={{ fontSize: '0.875rem' }}>Phone *</label>
+                                    <input
+                                        type="tel"
+                                        className="input"
+                                        value={newOwner.phone}
+                                        onChange={(e) => setNewOwner({ ...newOwner, phone: e.target.value })}
+                                        placeholder="+961..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="label" style={{ fontSize: '0.875rem' }}>Email</label>
+                                    <input
+                                        type="email"
+                                        className="input"
+                                        value={newOwner.email}
+                                        onChange={(e) => setNewOwner({ ...newOwner, email: e.target.value })}
+                                        placeholder="email@example.com"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="label" style={{ fontSize: '0.875rem' }}>WhatsApp</label>
+                                    <input
+                                        type="tel"
+                                        className="input"
+                                        value={newOwner.whatsapp}
+                                        onChange={(e) => setNewOwner({ ...newOwner, whatsapp: e.target.value })}
+                                        placeholder="+961..."
+                                    />
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleCreateNewOwner}
+                                className="btn btn-primary btn-sm"
+                            >
+                                Save Owner & Select
+                            </button>
+                        </div>
+                    )}
+                </div>
 
                 <div style={{ marginBottom: 'var(--space-lg)' }}>
                     <label className="label">Notes</label>

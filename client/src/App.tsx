@@ -1,5 +1,4 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
@@ -28,24 +27,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+import OwnerDashboardTabs from './components/DashboardTabs/OwnerDashboardTabs';
+
 const Dashboard = () => {
-  const { user, token } = useAuth();
-  const [stats, setStats] = useState<any>(null);
-
-  useEffect(() => {
-    if (user?.role !== "owner") return;
-
-    const loadStats = async () => {
-      const response = await fetch("http://localhost:3000/api/owner/performance", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (response.ok) {
-        setStats(await response.json());
-      }
-    };
-
-    loadStats();
-  }, [user, token]);
+  const { user } = useAuth();
 
   // --- If not an owner, keep showing the old simple dashboard ---
   if (user?.role !== "owner") {
@@ -64,73 +49,8 @@ const Dashboard = () => {
     );
   }
 
-  // --- Owner Performance Dashboard ---
-  return (
-    <div className="owner-dashboard">
-      <div className="page-header">
-        <h1 className="text-3xl font-bold mb-xs">Agency Performance Overview</h1>
-        <p className="text-secondary">Real-time insights into agent activity and performance</p>
-      </div>
-
-      {/* KPI CARDS */}
-      <div className="kpi-grid fade-in">
-        <div className="kpi-card">
-          <h3>{stats?.total_agents ?? "—"}</h3>
-          <p>Total Agents</p>
-        </div>
-        <div className="kpi-card">
-          <h3>{stats?.total_properties ?? "—"}</h3>
-          <p>Total Properties</p>
-        </div>
-        <div className="kpi-card">
-          <h3>{stats?.properties_this_month ?? "—"}</h3>
-          <p>New This Month</p>
-        </div>
-        <div className="kpi-card">
-          <h3>{stats?.total_clients ?? "—"}</h3>
-          <p>Total Clients</p>
-        </div>
-      </div>
-
-      {/* TOP AGENTS */}
-      <h2 className="section-title">Top Performing Agents</h2>
-      <div className="performance-table fade-in">
-        <table>
-          <thead>
-            <tr>
-              <th>Agent</th>
-              <th>Properties Added</th>
-              <th>Clients Added</th>
-              <th>Notes Created</th>
-              <th>Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(stats?.agents || []).map((agent: any) => (
-              <tr key={agent.id}>
-                <td>{agent.name}</td>
-                <td>{agent.properties_added}</td>
-                <td>{agent.clients_added}</td>
-                <td>{agent.notes_created}</td>
-                <td><strong>{agent.score}</strong></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* RECENT ACTIVITY */}
-      <h2 className="section-title">Recent Activity</h2>
-      <div className="activity-feed fade-in">
-        {(stats?.recent_activity || []).map((item: any, index: number) => (
-          <div className="activity-item" key={index}>
-            <span>📌</span>
-            <p>{item}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  // --- Owner Analytics Dashboard (Tabbed Interface) ---
+  return <OwnerDashboardTabs />;
 };
 
 

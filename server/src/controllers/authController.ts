@@ -4,11 +4,44 @@ import jwt from 'jsonwebtoken';
 import pool from '../config/database';
 import { RowDataPacket } from 'mysql2';
 
+import { getPlatformDb } from '../config/multiDb';
+
 export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     try {
-        // Hardcoded owner for development/fallback
+        // 1. Check Super Admin (Hardcoded Env)
+        const superEmail = process.env.SUPER_ADMIN_EMAIL;
+        const superPass = process.env.SUPER_ADMIN_PASSWORD;
+
+        console.log('Login Attempt:', { email, superEmail, matches: email === superEmail });
+
+        if (superEmail && email === superEmail) {
+            let match = false;
+            // Check if env password is a bcrypt hash (starts with $2b$ or $2a$)
+            if (superPass?.startsWith('$2b$') || superPass?.startsWith('$2a$')) {
+                match = await bcrypt.compare(password, superPass);
+            } else {
+                // Fallback to plain text comparison
+                match = password === superPass;
+            }
+
+            if (match) {
+                const token = jwt.sign(
+                    { id: 'SUPER_ADMIN', role: 'super_admin' },
+                    process.env.JWT_SECRET || 'secret',
+                    { expiresIn: '1d' }
+                );
+                return res.json({
+                    token,
+                    user: { id: 'SUPER_ADMIN', name: 'Super Admin', email: superEmail, role: 'super_admin' }
+                });
+            } else {
+                return res.status(401).json({ message: 'Invalid credentials' });
+            }
+        }
+
+        // 2. Hardcoded owner for development/fallback
         if (email === 'owner@example.com' && password === 'owner123') {
             const token = jwt.sign(
                 { id: 1, role: 'owner' },
@@ -21,6 +54,7 @@ export const login = async (req: Request, res: Response) => {
             });
         }
 
+        // 3. Check Standard Users (Agency DB)
         const [rows] = await pool.execute<RowDataPacket[]>('SELECT * FROM users WHERE email = ?', [email]);
         const user = rows[0];
 
@@ -28,9 +62,6 @@ export const login = async (req: Request, res: Response) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // In a real app, use bcrypt.compare. For initial setup/testing with plain text or manually hashed passwords, be careful.
-        // Assuming we will seed with hashed passwords or implement registration.
-        // For now, let's assume the password in DB is hashed.
         const match = await bcrypt.compare(password, user.password_hash);
 
         if (!match) {

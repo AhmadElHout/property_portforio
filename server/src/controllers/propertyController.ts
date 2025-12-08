@@ -167,27 +167,91 @@ export const createProperty = async (req: Request, res: Response) => {
 
         const [result] = await connection.execute<ResultSetHeader>(
             `INSERT INTO properties (
-        agent_id, property_type, purpose, furnished, city, area, ownership_type, 
-        ownership_notes, built_up_area, land_area, bedrooms, bathrooms, floor_level,
-        has_24_7_electricity, has_generator, has_elevator, has_parking, price_usd, notes,
-        maid_room, balcony, terrace, heating_system, ac_system, water_tank,
-        concierge, security, gym, pool, zoning, occupancy_status, payment_method, commission,
-        owner_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    agent_id,
+    property_type,
+    purpose,
+    furnished,
+    city,
+    area,
+    location_lat,
+    location_lng,
+    location_url,
+    ownership_type,
+    ownership_notes,
+    built_up_area,
+    land_area,
+    bedrooms,
+    bathrooms,
+    floor_level,
+    has_24_7_electricity,
+    has_generator,
+    has_elevator,
+    has_parking,
+    price_usd,
+    notes,
+    maid_room,
+    balcony,
+    terrace,
+    heating_system,
+    ac_system,
+    water_tank,
+    concierge,
+    security,
+    gym,
+    pool,
+    zoning,
+    occupancy_status,
+    payment_method,
+    commission,
+    owner_id,
+    status,
+    status_changed_at,
+    construction_year
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                user.id, data.property_type, data.purpose, data.furnished, data.city, data.area, data.ownership_type,
+                user.id,
+                data.property_type,
+                data.purpose,
+                data.furnished,
+                data.city,
+                data.area,
+                data.location_lat || null,
+                data.location_lng || null,
+                data.location_url || null,
+                data.ownership_type,
                 data.ownership_notes,
                 data.built_up_area === '' ? null : data.built_up_area,
                 data.land_area === '' ? null : data.land_area,
                 data.bedrooms === '' ? null : data.bedrooms,
                 data.bathrooms === '' ? null : data.bathrooms,
                 data.floor_level === '' ? null : data.floor_level,
-                data.has_24_7_electricity, data.has_generator, data.has_elevator, data.has_parking, data.price_usd, data.notes,
-                data.maid_room || false, data.balcony || false, data.terrace || false, data.heating_system || null, data.ac_system || null, data.water_tank || false,
-                data.concierge || false, data.security || false, data.gym || false, data.pool || false, data.zoning || null, data.occupancy_status || null, data.payment_method || null, data.commission || null,
-                data.owner_id || null
+                data.has_24_7_electricity,
+                data.has_generator,
+                data.has_elevator,
+                data.has_parking,
+                data.price_usd,
+                data.notes,
+                data.maid_room || false,
+                data.balcony || false,
+                data.terrace || false,
+                data.heating_system || null,
+                data.ac_system || null,
+                data.water_tank || false,
+                data.concierge || false,
+                data.security || false,
+                data.gym || false,
+                data.pool || false,
+                data.zoning || null,
+                data.occupancy_status || null,
+                data.payment_method || null,
+                data.commission || null,
+                data.owner_id || null,
+                data.status || 'active',
+                data.status === 'closed' ? new Date() : null,
+                data.construction_year || null
             ]
         );
+
 
         const propertyId = result.insertId;
 
@@ -234,28 +298,84 @@ export const updateProperty = async (req: Request, res: Response) => {
 
         await connection.execute(
             `UPDATE properties SET 
-            property_type=?, purpose=?, furnished=?, city=?, area=?, ownership_type=?, 
-            ownership_notes=?, built_up_area=?, land_area=?, bedrooms=?, bathrooms=?, floor_level=?,
-            has_24_7_electricity=?, has_generator=?, has_elevator=?, has_parking=?, price_usd=?, notes=?,
-            maid_room=?, balcony=?, terrace=?, heating_system=?, ac_system=?, water_tank=?,
-            concierge=?, security=?, gym=?, pool=?, zoning=?, occupancy_status=?, payment_method=?, commission=?,
-            owner_id=?
-            WHERE id = ?`,
+    property_type = ?,
+    purpose = ?,
+    furnished = ?,
+    city = ?,
+    area = ?,
+    location_lat = ?,
+    location_lng = ?,
+    location_url = ?,
+    ownership_type = ?, 
+    ownership_notes = ?, 
+    built_up_area = ?, 
+    land_area = ?, 
+    bedrooms = ?, 
+    bathrooms = ?, 
+    floor_level = ?,
+    has_24_7_electricity = ?, 
+    has_generator = ?, 
+    has_elevator = ?, 
+    has_parking = ?, 
+    price_usd = ?, 
+    notes = ?,
+    maid_room = ?, 
+    balcony = ?, 
+    terrace = ?, 
+    heating_system = ?, 
+    ac_system = ?, 
+    water_tank = ?,
+    concierge = ?, 
+    security = ?, 
+    gym = ?, 
+    pool = ?, 
+    zoning = ?, 
+    occupancy_status = ?, 
+    payment_method = ?, 
+    commission = ?,
+    owner_id = ?
+    WHERE id = ?`,
             [
-                data.property_type, data.purpose, data.furnished, data.city, data.area, data.ownership_type,
+                data.property_type,
+                data.purpose,
+                data.furnished,
+                data.city,
+                data.area,
+                data.location_lat || null,
+                data.location_lng || null,
+                data.location_url || null,
+                data.ownership_type,
                 data.ownership_notes,
                 data.built_up_area === '' ? null : data.built_up_area,
                 data.land_area === '' ? null : data.land_area,
                 data.bedrooms === '' ? null : data.bedrooms,
                 data.bathrooms === '' ? null : data.bathrooms,
                 data.floor_level === '' ? null : data.floor_level,
-                data.has_24_7_electricity, data.has_generator, data.has_elevator, data.has_parking, data.price_usd, data.notes,
-                data.maid_room || false, data.balcony || false, data.terrace || false, data.heating_system || null, data.ac_system || null, data.water_tank || false,
-                data.concierge || false, data.security || false, data.gym || false, data.pool || false, data.zoning || null, data.occupancy_status || null, data.payment_method || null, data.commission || null,
+                data.has_24_7_electricity,
+                data.has_generator,
+                data.has_elevator,
+                data.has_parking,
+                data.price_usd,
+                data.notes,
+                data.maid_room || false,
+                data.balcony || false,
+                data.terrace || false,
+                data.heating_system || null,
+                data.ac_system || null,
+                data.water_tank || false,
+                data.concierge || false,
+                data.security || false,
+                data.gym || false,
+                data.pool || false,
+                data.zoning || null,
+                data.occupancy_status || null,
+                data.payment_method || null,
+                data.commission || null,
                 data.owner_id || null,
                 id
             ]
         );
+
 
         // Update Leads (Delete all and re-insert)
         await connection.execute('DELETE FROM property_leads WHERE property_id = ?', [id]);
@@ -357,8 +477,12 @@ export const updatePropertyStatus = async (req: Request, res: Response) => {
 
         const oldStatus = props[0].status;
 
-        // Update status
-        await pool.execute('UPDATE properties SET status = ? WHERE id = ?', [status, id]);
+        // Update status - if status is 'closed', also set status_changed_at
+        if (status === 'closed') {
+            await pool.execute('UPDATE properties SET status = ?, status_changed_at = NOW() WHERE id = ?', [status, id]);
+        } else {
+            await pool.execute('UPDATE properties SET status = ? WHERE id = ?', [status, id]);
+        }
 
         // Record history
         await pool.execute(

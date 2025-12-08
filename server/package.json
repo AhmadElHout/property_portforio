@@ -7,6 +7,8 @@
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "db:init": "ts-node src/scripts/initDb.ts",
+    "db:setup": "ts-node src/scripts/initializeDatabase.ts",
+    "db:seed": "ts-node src/scripts/seedData.ts",
     "build": "tsc"
   },
   "keywords": [],
@@ -18,8 +20,8 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.6.5",
     "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.6.5",
     "sharp": "^0.32.6"
   },
   "devDependencies": {
@@ -30,6 +32,7 @@
     "@types/multer": "^1.4.11",
     "@types/node": "^20.10.4",
     "ts-node-dev": "^2.0.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.3.3"
   }
 }

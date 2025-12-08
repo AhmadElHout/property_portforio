@@ -22,6 +22,9 @@ interface Property {
     owner_name?: string;
     owner_phone?: string;
     leads?: { id: number; name: string; phone: string }[];
+    location_url?: string;
+    location_lat?: number | null;
+    location_lng?: number | null;
 }
 
 const PropertiesList = () => {
@@ -190,6 +193,24 @@ const PropertiesList = () => {
         },
         { header: 'City', accessor: 'city' as keyof Property },
         { header: 'Area', accessor: 'area' as keyof Property },
+        {
+            header: 'Location',
+            accessor: (item: Property) =>
+                item.location_url ? (
+                    <a
+                        href={item.location_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: 'var(--primary)', textDecoration: 'underline' }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        📍 View
+                    </a>
+                ) : (
+                    <span style={{ color: 'var(--text-tertiary)' }}>No location</span>
+                ),
+            width: '110px',
+        },
         {
             header: 'Price (USD)',
             accessor: (item: Property) => (
