@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 interface User {
-    id: number;
+    id: number | string;
     name: string;
     email: string;
-    role: 'owner' | 'agent' | 'curator';
+    role: 'owner' | 'agent' | 'curator' | 'super_admin';
 }
 
 interface AuthContextType {

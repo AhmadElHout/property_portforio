@@ -194,3 +194,42 @@ export const getGlobalMonthlyClosureRatio = async (req: Request, res: Response) 
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
+// GET /superadmin/time-to-close - Average time to close by various dimensions
+export const getGlobalTimeToClose = async (req: Request, res: Response) => {
+    if (req.user?.role !== 'super_admin') return res.status(403).json({ message: 'Access denied' });
+
+    try {
+        const data = await SuperAdminAggregator.getTimeToCloseAnalytics();
+        res.json(data);
+    } catch (error: any) {
+        console.error('Error fetching time to close stats:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// GET /superadmin/market-demand - Market demand analytics
+export const getGlobalMarketDemand = async (req: Request, res: Response) => {
+    if (req.user?.role !== 'super_admin') return res.status(403).json({ message: 'Access denied' });
+
+    try {
+        const data = await SuperAdminAggregator.getMarketDemandAnalytics();
+        res.json(data);
+    } catch (error: any) {
+        console.error('Error fetching market demand:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// GET /superadmin/farming-recommendations
+export const getFarmingRecommendations = async (req: Request, res: Response) => {
+    if (req.user?.role !== 'super_admin') return res.status(403).json({ message: 'Access denied' });
+
+    try {
+        const data = await SuperAdminAggregator.getFarmingRecommendations();
+        res.json(data);
+    } catch (error: any) {
+        console.error('Error fetching farming recommendations:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

@@ -11,6 +11,7 @@ import UserManagement from './pages/Owner/Users';
 import AgencyPortfolio from './pages/Owner/AgencyPortfolio';
 import ContentQueue from './pages/Curator/Queue';
 import PropertyReview from './pages/Curator/Review';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import './styles/owner-dashboard.css';
 
 
@@ -31,6 +32,10 @@ import OwnerDashboardTabs from './components/DashboardTabs/OwnerDashboardTabs';
 
 const Dashboard = () => {
   const { user } = useAuth();
+
+  if (user?.role === 'super_admin') {
+    return <Navigate to="/super-admin" replace />;
+  }
 
   // --- If not an owner, keep showing the old simple dashboard ---
   if (user?.role !== "owner") {
@@ -125,6 +130,15 @@ function App() {
                 </RoleRoute>
               } />
             </Route>
+
+            {/* Standalone Super Admin Route */}
+            <Route path="/super-admin" element={
+              <ProtectedRoute>
+                <RoleRoute roles={['super_admin']}>
+                  <SuperAdminDashboard />
+                </RoleRoute>
+              </ProtectedRoute>
+            } />
           </Routes>
         </AuthProvider>
       </ToastProvider>

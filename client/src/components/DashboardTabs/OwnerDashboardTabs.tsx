@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import MonthlyClosureRatioChart from '../Charts/MonthlyClosureRatioChart';
+import MonthNavigatorPerformance from '../Dashboard/Analytics/MonthNavigatorPerformance';
 import AvgTimeToCloseLocation from '../Dashboard/Analytics/AvgTimeToCloseLocation';
 import AvgTimeToCloseBudget from '../Dashboard/Analytics/AvgTimeToCloseBudget';
 import AvgTimeToCloseAge from '../Dashboard/Analytics/AvgTimeToCloseAge';
@@ -61,7 +61,7 @@ const OwnerDashboardTabs = () => {
             <div style={{ minHeight: '500px' }}>
                 {activeTab === 0 && (
                     <div className="fade-in">
-                        <MonthlyClosureRatioChart />
+                        <MonthNavigatorPerformance />
                     </div>
                 )}
 

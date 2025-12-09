@@ -9,7 +9,10 @@ import {
     getAllClients,
     getAllAgents,
     getGlobalStats,
-    getGlobalMonthlyClosureRatio
+    getGlobalMonthlyClosureRatio,
+    getGlobalTimeToClose,
+    getGlobalMarketDemand,
+    getFarmingRecommendations
 } from '../controllers/superAdminController';
 
 const router = express.Router();
@@ -30,5 +33,8 @@ router.get('/clients', getAllClients);
 router.get('/agents', getAllAgents);
 router.get('/stats', getGlobalStats);
 router.get('/closure-ratio', getGlobalMonthlyClosureRatio);
+router.get('/time-to-close', getGlobalTimeToClose);
+router.get('/market-demand', getGlobalMarketDemand);
+router.get('/farming-recommendations', getFarmingRecommendations);
 
 export default router;

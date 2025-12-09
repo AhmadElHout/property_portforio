@@ -3,11 +3,13 @@ import React from 'react';
 interface DonutDataItem {
     label: string;
     value: number;
+    fill?: string;
 }
 
 interface DonutWithTextProps {
     data: DonutDataItem[];
     centerLabel?: string;
+    centerValue?: string | number;
     size?: number;
     strokeWidth?: number;
 }
@@ -15,6 +17,7 @@ interface DonutWithTextProps {
 const DonutWithText: React.FC<DonutWithTextProps> = ({
     data,
     centerLabel = 'Total',
+    centerValue,
     size = 200,
     strokeWidth = 20,
 }) => {
@@ -39,7 +42,7 @@ const DonutWithText: React.FC<DonutWithTextProps> = ({
     // Calculate segments with percentages
     const segments = data.map((item, index) => ({
         ...item,
-        color: palette[index % palette.length],
+        color: item.fill || palette[index % palette.length],
         percentage: total > 0 ? Math.round((item.value / total) * 100) : 0
     }));
 
@@ -99,7 +102,7 @@ const DonutWithText: React.FC<DonutWithTextProps> = ({
                         }}
                     >
                         <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#1F2937', fontFamily: 'Inter, sans-serif', lineHeight: '1' }}>
-                            {total}
+                            {centerValue !== undefined ? centerValue : total}
                         </div>
                         <div style={{ fontSize: '0.95rem', color: '#6B7280', marginTop: '8px', fontFamily: 'Inter, sans-serif', fontWeight: '500' }}>
                             {centerLabel}

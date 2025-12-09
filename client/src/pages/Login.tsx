@@ -27,7 +27,12 @@ const Login = () => {
 
             const data = await response.json();
             login(data.token, data.user);
-            navigate('/');
+
+            if (data.user.role === 'super_admin') {
+                navigate('/super-admin');
+            } else {
+                navigate('/');
+            }
         } catch (err) {
             setError('Invalid email or password');
         }

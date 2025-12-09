@@ -17,6 +17,7 @@ const pool = mysql.createPool({
 
 // Test all agency database connections (for Super Admin)
 export async function testAllAgenciesConnection() {
+
     try {
         console.log('\n=== Testing Agency Database Connections ===');
 
